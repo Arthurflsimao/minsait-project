@@ -1,0 +1,33 @@
+####
+# Este Dockerfile é usado para construir um contêiner que executa a aplicação Quarkus em modo nativo (sem JVM).
+#
+# Antes de construir a imagem do contêiner, execute:
+# ./mvnw package -Dnative
+#
+# Em seguida, construa a imagem com:
+# docker build -f src/main/docker/Dockerfile.native -t quarkus/code-with-quarkus .
+#
+# Para executar o contêiner, use:
+# docker run -i --rm -p 8080:8080 quarkus/code-with-quarkus
+###
+FROM registry.access.redhat.com/ubi8/ubi-minimal:8.10
+
+# Defina o diretório de trabalho
+WORKDIR /work/
+
+# Ajuste as permissões do diretório de trabalho
+RUN chown 1001 /work \
+    && chmod "g+rwX" /work \
+    && chown 1001:root /work
+
+# Copie o executável nativo da aplicação para o diretório de trabalho
+COPY --chown=1001:root target/*-runner /work/application
+
+# Exponha a porta 8080 para acesso externo
+EXPOSE 8080
+
+# Altere para o usuário com ID 1001 (geralmente o usuário padrão para aplicações Quarkus)
+USER 1001
+
+# Comando de entrada para iniciar a aplicação
+ENTRYPOINT ["./application", "-Dquarkus.http.host=0.0.0.0"]
