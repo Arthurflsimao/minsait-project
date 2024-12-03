@@ -1,0 +1,38 @@
+version: '3'
+services:
+  frontend:
+    build:
+      context: ./cadastramento-operacoes  # Caminho relativo para o frontend
+      dockerfile: Dockerfile  # O Dockerfile está no diretório do contexto
+    ports:
+      - "4200:80"  # Mapear a porta 80 (do nginx) para 4200
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+  backend:
+    build:
+      context: ./minsait-project  # Caminho relativo para o backend
+      dockerfile: Dockerfile  # O Dockerfile está no diretório do contexto
+    ports:
+      - "8080:8080"  # Mapeia a porta 8080 para a mesma no host
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+  db:
+    image: postgres:latest  # Imagem do banco de dados
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mydb
+    ports:
+      - "5432:5432"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
